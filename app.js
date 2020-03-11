@@ -1,11 +1,30 @@
 const { Client, RichEmbed } = require('discord.js');
 const client = new Client();
 const fetch = require('node-fetch');
+var fs = require("fs");
 client.once('ready', () =>{
     console.log(`Bot ONLINE \nBot tag: ${client.user.tag}`)
 })
 client.on('message', async message => {
   if(message.author.bot) return;
+  fs.readFile("palavrasBanidas.txt", function(err, buf) {
+    var banned;
+    banned = buf.toString().split('\n');
+    for(var i in banned){
+      if((message.content.trim().indexOf(banned[i].trim()) != -1) && banned[i].trim() != ""){
+        console.log('comeco aq')
+        console.log(message.content.trim());
+        console.log(banned[i]);
+        console.log(message.content.trim().indexOf(banned[i].trim()));
+        console.log('-------------');
+        message.delete(1);
+        message.channel.send("Que coisa feia "+message.author+".\nVocê disse uma palavra feia e sobrou pra mim apagar");
+        break;
+        return 0;
+      }
+    }
+  });
+
   if (!message.content.startsWith("!")) return;
   if(message.content.indexOf("palhaço") != -1 || message.content.indexOf("palhaco") != -1 || message.content.indexOf("clown") != -1){
     message.channel.bulkDelete(1);
@@ -172,5 +191,36 @@ client.on('message', async message => {
           }
       });
   }
+    //message.delete(1);
+    //message.channel.send("Deletado");
+    if((message.content.substring(0,3) != "!bw" && message.content[6] === " ") || (message.content.substring(0,8) != "!banword" && message.content[8] === " ") || (message.content.substring(0,3) != "!bp" && message.content[3] === " ") || (message.content.substring(0,13) != "!panirpalavra" && message.content[13] === " ")){
+      var pal = message.content.split(" ")[1];
+      if(pal == "" || pal == null || pal == undefined){
+        message.channel.send(message.author+" coloca a palavra que vc quer que seja banida né lindo")
+      }else{
+        fs.readFile("palavrasBanidas.txt", function(err, buf) {
+          var newP = buf.toString() + "\n" + pal
+          fs.writeFile("palavrasBanidas.txt", newP, (err) => {
+            if (err){
+              console.log(err);
+            }else{
+              message.channel.send('A palavra '+pal+' foi adicionada a lista de banidos com sucesso');
+              console.log("Nova palavra banida adicionada com sucesso!\nAdicionado "+pal);
+            }
+          });
+        });
+      }
+    }
+    if(message.content === "!pbanidas"){
+      fs.readFile("palavrasBanidas.txt", function(err, buf) {
+        var newP = buf.toString();
+        const embeddd = {
+          color: 0xff0000,
+          title: "Palavras banidas",
+          description: newP
+        }
+          message.channel.send({ embed: embeddd });
+      });
+    }
 })
 client.login('Njg2OTQ1NTkzMzM5MTUwNDgw.XmemxA.Ca_c4i67SLROgmcRqXDqq6qqpt0');
